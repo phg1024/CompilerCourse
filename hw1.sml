@@ -70,7 +70,7 @@ fun number_before_reaching_sum(sum: int, numbers: int list) =
 
 val days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 fun what_month(whichday: int): int =
-  number_before_reaching_sum(whichday, days_in_months)
+  number_before_reaching_sum(whichday, days_in_months) + 1
 
 fun month_range(day1: int, day2: int) =
   if day1 > day2 then []
