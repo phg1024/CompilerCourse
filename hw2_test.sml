@@ -17,9 +17,18 @@ val test5 = card_color (Clubs, Num 2) = Black
 
 val test6 = card_value (Clubs, Num 2) = 2
 
+val test62 = card_value (Clubs, Jack) = 10
+val test63 = card_value (Clubs, Queen) = 10
+val test64 = card_value (Clubs, King) = 10
+
 val test7 = remove_card ([(Hearts, Ace)], (Hearts, Ace), IllegalMove) = []
 
 val test8 = all_same_color [(Hearts, Ace), (Hearts, Ace), (Hearts, Num 1)] = true
+val test82 = all_same_color [(Hearts, Ace), (Hearts, Ace), (Hearts, Num 1), (Hearts, Num 5)] = true
+val test83 = all_same_color [(Hearts, Ace), (Hearts, Ace), (Hearts, Num 1), (Spades, Num 5)] = false
+val test84 = all_same_color [(Hearts, Ace), (Hearts, Ace), (Hearts, Num 1), (Spades, Num 5), (Hearts, Ace)] = false
+val test85 = all_same_color [(Hearts, Ace), (Hearts, Ace), (Hearts, Num 1), (Spades, Num 5), (Diamonds, Ace)] = false
+val test86 = all_same_color [(Hearts, Ace), (Spades, Ace), (Hearts, Num 1), (Spades, Num 5), (Diamonds, Ace)] = false
 
 val test9 = sum_cards [(Clubs, Num 2),(Clubs, Num 2)] = 4
 

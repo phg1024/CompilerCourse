@@ -37,13 +37,9 @@ fun get_substitutions1(substitutions: string list list, s: string): string list 
   case substitutions of
     [] => []
   | h::t =>
-    let
-      val res = all_except_option(s, h)
-    in
-      case all_except_option(s, h) of
+    case all_except_option(s, h) of
         NONE => get_substitutions1(t, s)
       | SOME lst => lst @ get_substitutions1(t, s)
-    end
 
 fun get_substitutions2(substitutions: string list list, s: string): string list =
   let
@@ -86,29 +82,24 @@ fun card_color(c: card): color =
   case c of
     (Clubs, _) => Black
   | (Spades, _)  => Black
-  | (Hearts, _) => Red
-  | (Diamonds, _) => Red
+  | (_, _) => Red
 
 fun card_value(c: card): int =
   case c of
     (_, Num x) => x
-  | (_, Jack) => 10
-  | (_, Queen) => 10
-  | (_, King) => 10
   | (_, Ace) => 11
+  | (_, _) => 10
 
 fun remove_card(cs: card list, c: card, e) =
   case cs of
     [] => raise e
-  | h::t =>
-    if h = c then t
-    else h :: remove_card(t, c, e)
+  | h::t => if h = c then t else h :: remove_card(t, c, e)
 
 fun all_same_color(cs: card list) =
   case cs of
     [] => true
   | h::[] => true
-  | h1::h2::t => (card_color h1 = card_color h2) andalso all_same_color(t)
+  | h1::h2::t => (card_color h1 = card_color h2) andalso all_same_color(h2::t)
 
 fun sum_cards(cs: card list) =
   let
@@ -123,11 +114,11 @@ fun sum_cards(cs: card list) =
 fun score(cs: card list, goal: int) =
   let
     val sum_val = sum_cards(cs)
-    val pre_score = if sum_val > goal then 3 * (sum_val - goal) else goal - sum_val
+    val pre_score = if sum_val > goal
+                    then 3 * (sum_val - goal)
+                    else goal - sum_val
   in
-    case all_same_color(cs) of
-      true => pre_score div 2
-    | false => pre_score
+    if all_same_color(cs) then pre_score div 2 else pre_score
   end
 
 fun officiate(cs: card list, ms: move list, goal: int) =
@@ -144,18 +135,73 @@ fun officiate(cs: card list, ms: move list, goal: int) =
                 if sum_cards(cs_h::held) > goal
                 then score(cs_h::held, goal)
                 else play_game(cs_h::held, cs_t, ms_t))
-        | Discard x =>
-          let
-            val new_held = remove_card(held, x, IllegalMove)
-          in
-            play_game(new_held, cards, ms_t)
-          end
+        | Discard x => play_game(remove_card(held, x, IllegalMove), cards, ms_t)
   in
     play_game([], cs, ms)
   end
 
-fun score_challenge(cs: card list, goal: int) = 0
+fun sum_cards_extended(cs: card list) =
+  let
+    fun add_to_list(scores: int list, cv: int) =
+      case scores of
+        [] => []
+      | h::t => (h+cv) :: add_to_list(t, cv)
+    fun helper(clist: card list, s: int list) =
+      case clist of
+        [] => s
+      | h::t =>
+        case h of
+          (_, Ace) => helper(t, add_to_list(s, 1) @ add_to_list(s, 11))
+        | (_, _) => helper(t, add_to_list(s, card_value h))
+  in
+    helper(cs, [0])
+  end
 
-fun officiate_challenge(cs: card list, ms: move list, goal: int) = 0
+fun score_challenge(cs: card list, goal: int) =
+  let
+    fun map_fun(f, l) =
+      case l of
+        [] => []
+      | h::t => (f h) :: map_fun(f, t)
+    val sum_vals = sum_cards_extended(cs)
+    fun pre_score_func(x) = if x > goal then 3 * (x - goal) else goal - x
+    val pre_scores = map_fun(pre_score_func, sum_vals)
+    fun min_val(l) =
+      case l of
+        h::[] => h
+      | h::t =>
+        let
+          val min_rest = min_val t
+        in
+          if h < min_rest then h else min_rest
+        end
+    val pre_score = min_val pre_scores
+  in
+    if all_same_color(cs) then pre_score div 2 else pre_score
+  end
 
-fun careful_player(cs: card list, goal: int): move list = []
+fun officiate_challenge(cs: card list, ms: move list, goal: int) =
+  let
+    fun play_game(held: card list, cards: card list, moves: move list) =
+      case moves of
+        [] => score_challenge(held, goal)
+      | ms_h::ms_t =>
+        case ms_h of
+          Draw =>
+            (case cards of
+              [] => score_challenge(held, goal)
+            | cs_h::cs_t =>
+                if sum_cards(cs_h::held) > goal
+                then score_challenge(cs_h::held, goal)
+                else play_game(cs_h::held, cs_t, ms_t))
+        | Discard x => play_game(remove_card(held, x, IllegalMove), cards, ms_t)
+  in
+    play_game([], cs, ms)
+  end
+
+fun careful_player(cs: card list, goal: int): move list =
+  let
+    exception NotImplementedError
+  in
+    raise NotImplementedError
+  end
