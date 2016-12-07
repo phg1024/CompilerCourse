@@ -131,7 +131,7 @@ fun match(v, p) =
               Unit => SOME []
             | _ => NONE)
   | ConstP x => (case v of
-                  Const x => SOME []
+                  Const y => if x = y then SOME [] else NONE
                 | _ => NONE)
   | TupleP ps => (case v of
                   Tuple vs => all_answers match (ListPair.zip(vs, ps))
