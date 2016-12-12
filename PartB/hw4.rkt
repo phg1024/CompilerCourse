@@ -79,3 +79,13 @@
                                        res)
                                 res)))))])
     fetch))
+
+(define-syntax while-less
+  (syntax-rules (do)
+    [(while-less e1 do e2)
+     (letrec ([final e1]
+           [iter (lambda ()
+                   (let ([cur e2])
+                     (if (< cur final) (iter)
+                         #t)))])
+       (iter))]))
