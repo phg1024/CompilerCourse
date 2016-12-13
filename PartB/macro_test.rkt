@@ -26,9 +26,15 @@
 (define-syntax while-less
   (syntax-rules (do)
     [(while-less e1 do e2)
-     (let ([final e1]
+     (letrec ([final e1]
            [iter (lambda ()
                    (let ([cur e2])
                      (if (< cur final) (iter)
-                         #t)])
-       ())]))
+                         #t)))])
+       (iter))]))
+
+(define a 2)
+(while-less 7 do (begin (set! a (+ a 1)) (print "x") a))
+a
+(while-less 7 do (begin (set! a (+ a 1)) (print "x") a))
+a
